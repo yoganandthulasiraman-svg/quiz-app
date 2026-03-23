@@ -4,8 +4,19 @@ export async function POST(req: NextRequest) {
   try {
     const { question, answer, topic, playerAge, userQuestion } = await req.json()
 
+    // Input validation
+    if (!userQuestion || typeof userQuestion !== 'string' || userQuestion.trim().length === 0) {
+      return NextResponse.json({ error: 'Question is required.' }, { status: 400 })
+    }
+    if (userQuestion.length > 300) {
+      return NextResponse.json({ error: 'Question is too long.' }, { status: 400 })
+    }
+    if (typeof playerAge !== 'number' || playerAge < 7 || playerAge > 18) {
+      return NextResponse.json({ error: 'Invalid age.' }, { status: 400 })
+    }
+
     const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
+    if (!apiKey) return NextResponse.json({ error: 'Service unavailable.' }, { status: 500 })
 
     const ageDesc =
       playerAge <= 8  ? `a ${playerAge}-year-old child (very simple words, short fun sentences)` :

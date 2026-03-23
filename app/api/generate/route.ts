@@ -4,11 +4,20 @@ export async function POST(req: NextRequest) {
   try {
     const { topic, playerAge } = await req.json()
 
+    // Input validation
+    if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
+      return NextResponse.json({ error: 'Topic is required.' }, { status: 400 })
+    }
+    if (topic.length > 100) {
+      return NextResponse.json({ error: 'Topic is too long.' }, { status: 400 })
+    }
+    if (typeof playerAge !== 'number' || playerAge < 7 || playerAge > 18) {
+      return NextResponse.json({ error: 'Invalid age.' }, { status: 400 })
+    }
+
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({
-        error: 'API key not configured. Add GEMINI_API_KEY to your .env.local file. Get a free key at aistudio.google.com',
-      }, { status: 500 })
+      return NextResponse.json({ error: 'Service unavailable.' }, { status: 500 })
     }
 
     const ageDesc =
